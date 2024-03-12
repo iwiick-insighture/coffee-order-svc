@@ -1,0 +1,382 @@
+{
+  "info": {
+    "_postman_id": "a021a81f-621d-4ead-9bf0-e1bf3e59534c",
+    "name": "coffee-order-svc",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "29081713"
+  },
+  "item": [
+    {
+      "name": "Get Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      },
+      "response": [
+        {
+          "name": "Get Health",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "64"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"40-w0LMYGF5t5ExGd3lS6M+8u2vu34\""
+            },
+            {
+              "key": "Date",
+              "value": "Tue, 12 Mar 2024 13:03:47 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"message\": \"coffee-order-svc is up and running on port :: 5003\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get User Orders",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7",
+          "host": ["{{base_url}}"],
+          "path": ["user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7"]
+        }
+      },
+      "response": [
+        {
+          "name": "Get User Orders",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7",
+              "host": ["{{base_url}}"],
+              "path": ["user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "1053"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"41d-Kl/pu5Q+u7JAkyg3L5MhGCrJMyQ\""
+            },
+            {
+              "key": "Date",
+              "value": "Tue, 12 Mar 2024 13:25:22 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"message\": \"User Orders Retrieved :: user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7\",\n    \"data\": [\n        {\n            \"_id\": \"order_6e061e6c-75b0-4414-ba6a-a644d28f0628\",\n            \"userId\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7\",\n            \"items\": [\n                {\n                    \"_id\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7::coffee_325f4fd3-b8b1-445b-8bad-126fc38f6248\",\n                    \"quantity\": 3,\n                    \"userId\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7\",\n                    \"coffeeId\": \"coffee_325f4fd3-b8b1-445b-8bad-126fc38f6248\",\n                    \"createdAt\": \"2024-03-12T13:14:57.059Z\",\n                    \"__v\": 0\n                },\n                {\n                    \"_id\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7::coffee_325f4fd3-b8b1-445b-8bad-126fc38f6448\",\n                    \"quantity\": 1,\n                    \"userId\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7\",\n                    \"coffeeId\": \"coffee_325f4fd3-b8b1-445b-8bad-126fc38f6448\",\n                    \"createdAt\": \"2024-03-12T13:14:57.059Z\",\n                    \"__v\": 0\n                },\n                {\n                    \"_id\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7::coffee_325f4fd3-b3b1-445b-8bad-126fc38f6448\",\n                    \"quantity\": 1,\n                    \"userId\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7\",\n                    \"coffeeId\": \"coffee_325f4fd3-b3b1-445b-8bad-126fc38f6448\",\n                    \"createdAt\": \"2024-03-12T13:14:57.059Z\",\n                    \"__v\": 0\n                }\n            ],\n            \"createdAt\": \"2024-03-12T13:22:28.759Z\",\n            \"__v\": 0\n        }\n    ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Create User Order",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7",
+          "host": ["{{base_url}}"],
+          "path": ["user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7"]
+        }
+      },
+      "response": [
+        {
+          "name": "Create User Order",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7",
+              "host": ["{{base_url}}"],
+              "path": ["user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "1043"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"413-4xSxD+ijR3J3Toh0LKDZZbAcGAc\""
+            },
+            {
+              "key": "Date",
+              "value": "Tue, 12 Mar 2024 13:24:13 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"message\": \"Order Created :: user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7\",\n    \"data\": {\n        \"_id\": \"order_4669801b-54bd-4162-9365-b1d10b1e29d2\",\n        \"userId\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7\",\n        \"items\": [\n            {\n                \"_id\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7::coffee_325f4fd3-b8b1-445b-8bad-126fc38f6248\",\n                \"quantity\": 3,\n                \"userId\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7\",\n                \"coffeeId\": \"coffee_325f4fd3-b8b1-445b-8bad-126fc38f6248\",\n                \"createdAt\": \"2024-03-12T13:14:57.059Z\",\n                \"__v\": 0\n            },\n            {\n                \"_id\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7::coffee_325f4fd3-b8b1-445b-8bad-126fc38f6448\",\n                \"quantity\": 1,\n                \"userId\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7\",\n                \"coffeeId\": \"coffee_325f4fd3-b8b1-445b-8bad-126fc38f6448\",\n                \"createdAt\": \"2024-03-12T13:14:57.059Z\",\n                \"__v\": 0\n            },\n            {\n                \"_id\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7::coffee_325f4fd3-b3b1-445b-8bad-126fc38f6448\",\n                \"quantity\": 1,\n                \"userId\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7\",\n                \"coffeeId\": \"coffee_325f4fd3-b3b1-445b-8bad-126fc38f6448\",\n                \"createdAt\": \"2024-03-12T13:14:57.059Z\",\n                \"__v\": 0\n            }\n        ],\n        \"createdAt\": \"2024-03-12T13:22:28.759Z\",\n        \"__v\": 0\n    }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Delete Order By Id",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"hello@gmail.com\",\r\n    \"password\": \"iwiick\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7/order_4669801b-54bd-4162-9365-b1d10b1e29d2",
+          "host": ["{{base_url}}"],
+          "path": [
+            "user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7",
+            "order_4669801b-54bd-4162-9365-b1d10b1e29d2"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Delete Order By Id",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"hello@gmail.com\",\r\n    \"password\": \"iwiick\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7/order_4669801b-54bd-4162-9365-b1d10b1e29d2",
+              "host": ["{{base_url}}"],
+              "path": [
+                "user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7",
+                "order_4669801b-54bd-4162-9365-b1d10b1e29d2"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "1050"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"41a-gMHzdLEqD4+qmShM19ESmzJQZvo\""
+            },
+            {
+              "key": "Date",
+              "value": "Tue, 12 Mar 2024 13:25:15 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"message\": \"Order Deleted by Id :: order_4669801b-54bd-4162-9365-b1d10b1e29d2\",\n    \"data\": {\n        \"_id\": \"order_4669801b-54bd-4162-9365-b1d10b1e29d2\",\n        \"userId\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7\",\n        \"items\": [\n            {\n                \"_id\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7::coffee_325f4fd3-b8b1-445b-8bad-126fc38f6248\",\n                \"quantity\": 3,\n                \"userId\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7\",\n                \"coffeeId\": \"coffee_325f4fd3-b8b1-445b-8bad-126fc38f6248\",\n                \"createdAt\": \"2024-03-12T13:14:57.059Z\",\n                \"__v\": 0\n            },\n            {\n                \"_id\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7::coffee_325f4fd3-b8b1-445b-8bad-126fc38f6448\",\n                \"quantity\": 1,\n                \"userId\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7\",\n                \"coffeeId\": \"coffee_325f4fd3-b8b1-445b-8bad-126fc38f6448\",\n                \"createdAt\": \"2024-03-12T13:14:57.059Z\",\n                \"__v\": 0\n            },\n            {\n                \"_id\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7::coffee_325f4fd3-b3b1-445b-8bad-126fc38f6448\",\n                \"quantity\": 1,\n                \"userId\": \"user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7\",\n                \"coffeeId\": \"coffee_325f4fd3-b3b1-445b-8bad-126fc38f6448\",\n                \"createdAt\": \"2024-03-12T13:14:57.059Z\",\n                \"__v\": 0\n            }\n        ],\n        \"createdAt\": \"2024-03-12T13:22:28.759Z\",\n        \"__v\": 0\n    }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Delete All User Orders",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7",
+          "host": ["{{base_url}}"],
+          "path": ["user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7"]
+        }
+      },
+      "response": [
+        {
+          "name": "Delete All User Orders",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7",
+              "host": ["{{base_url}}"],
+              "path": ["user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "123"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"7b-Us2WTZiXlk94I7Or/Fqd+R9iPhg\""
+            },
+            {
+              "key": "Date",
+              "value": "Tue, 12 Mar 2024 13:23:14 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"message\": \"All Orders Deleted :: user_7e1ffca4-ae7e-483b-816d-f5e6702ceda7\",\n    \"data\": {\n        \"acknowledged\": true,\n        \"deletedCount\": 5\n    }\n}"
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5003",
+      "type": "string"
+    }
+  ]
+}
