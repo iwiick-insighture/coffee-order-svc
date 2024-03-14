@@ -3,6 +3,7 @@ import Order from "../models/order.model";
 import { getPrefixedUUID } from "../utils";
 import configData from "../configs/config";
 import { CartItem } from "../common/cart.dto";
+import { RedisService } from "./redis";
 
 export const getUserOrders = async (userId: string): Promise<any> => {
   const data = await Order.aggregate([
@@ -24,13 +25,22 @@ export const createUserOrder = async (userId: string): Promise<any> => {
     const items: CartItem[] = res.data || [];
 
     if (items.length > 0) {
-      const newItem = new Order({
+      const newOrder = new Order({
         _id: getPrefixedUUID(),
         userId,
         items,
       });
 
-      return await newItem.save();
+      await RedisService.getClient()
+        .publish("order", JSON.stringify(newOrder))
+        .then(() => {
+          console.log(`New Order Published to 'order' channel`);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+
+      return await newOrder.save();
     } else {
       undefined;
     }
