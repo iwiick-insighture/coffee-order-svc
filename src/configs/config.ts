@@ -7,8 +7,12 @@ interface Config {
     uri: string;
   };
   services: {
-    cartSvcBaseUrl: string
-  }
+    cartSvcBaseUrl: string;
+  };
+  redis: {
+    host: string;
+    port: number;
+  };
 }
 
 const configFile = join(process.cwd(), "./config.json");
