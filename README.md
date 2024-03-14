@@ -13,5 +13,9 @@ interface Config {
   services: {
     cartSvcBaseUrl: string,
   };
+  redis: {
+    host: string;
+    port: number;
+  };
 }
 ```
