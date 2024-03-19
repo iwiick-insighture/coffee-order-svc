@@ -79,7 +79,7 @@ jobs:
           FILE_PATHS: ${{ steps.get-file-paths.outputs.file-paths }}
         run: |2-
 
-                  payload=$(jq -n --arg logs ${{ env.LOGS }} --arg file_paths "$FILE_PATHS" '{"error_message": $logs, "available_files": $file_paths}')
+                  payload=$(jq -n --arg logs '${{ env.LOGS }}' --arg file_paths "$FILE_PATHS" '{"error_message": $logs, "available_files": $file_paths}')
                   echo "payload: $payload"
 
                   response=$(curl -X POST -d "$payload"  -H 'Authorization: ${{ env.SERVICE_ACC_ACCESS_TOKEN }}' -H 'x-auth-by: sa' -H 'x-organization-id: ${{ env.PIPELINE_ORGANIZATION_ID }}' -H 'x-project-id: ${{ env.PIPELINE_PROJECT_ID }}' -H 'x-trace-id: ${{ env.PIPELINE_TRACE_ID }}' -H 'x-resource-id: ${{ env.PIPELINE_APPLICATION_ID }}' -H 'Content-Type: application/json'  '${{ env.API_GATEWAY_BASEURL }}/ai-suggested-solution-service/identify-files/')
