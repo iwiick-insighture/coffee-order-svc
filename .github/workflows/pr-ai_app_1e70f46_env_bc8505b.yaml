@@ -1,0 +1,199 @@
+name: pr-ai_app_1e70f46_env_bc8505b Pipeline (Skyu Generated)
+'on':
+  workflow_dispatch: {}
+  repository_dispatch:
+    types: pipeline_3e17ce0f-8f0b-4235-a2d7-6868713c818c
+env:
+  ENCODED_PIPELINE_SECRET: ${{secrets.COFFEEORDERSVC_PRAI_APP_1E70F46_ENV_BC8505B}}
+  COMMIT_ID: ${{github.event.client_payload.commitId || github.sha}}
+jobs:
+  _status-pending:
+    name: _status Pending
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Run :: Decoding Secrets 8854da'
+        run: |2-
+
+                  if [ ! -x "$(command -v jq)" ]; then
+                    echo "jq not found, installing..."
+                    sudo apt-get update
+                    sudo apt-get install -y jq
+                  fi
+                  echo "${{ env.ENCODED_PIPELINE_SECRET }}" | base64 --decode | jq -r 'to_entries[] | "\(.key)=\(.value)"' | while read line; do echo "$line" >> $GITHUB_ENV; echo "::add-mask::${line#*=}"; done
+                
+      - name: Pipeline Started
+        run: |2-
+
+                response=$(curl -X PUT -H 'Authorization: ${{ env.SERVICE_ACC_ACCESS_TOKEN }}' -H 'x-organization-id: ${{ env.PIPELINE_ORGANIZATION_ID }}' -H 'x-project-id: ${{ env.PIPELINE_PROJECT_ID }}' -H 'x-environment-id: ${{ env.PIPELINE_ENVIRONMENT_ID }}' -H 'x-trace-id: ${{ env.PIPELINE_TRACE_ID }}' -H 'x-auth-by: sa' -H 'Content-Type: application/x-www-form-urlencoded'  '${{ env.API_GATEWAY_BASEURL }}/pipeline-service/${{ env.PIPELINE_ID }}/PENDING')
+
+                if echo "$response" | grep -q '"success":true'; then
+                  echo "SUCCESS :: $response"
+                else
+                  echo "FAILED :: $response"
+                fi
+              
+  fix-code-with-ai:
+    name: Fix Code With AI
+    runs-on: ubuntu-latest
+    permissions: write-all
+    env:
+      LOGS: ${{ github.event.client_payload.logs }}
+    steps:
+      - name: 'Run :: Check Logs'
+        id: check-logs
+        run: |2-
+
+                  if ${{ env.LOGS != null }}; then
+                    echo "Logs found..."
+                    echo "Logs: ${{ env.LOGS }}"
+                  else 
+                    echo "Logs Not found to run the AI pipeline"
+                    exit 1
+                  fi
+                
+      - name: 'Run :: Decoding Secrets a003d7'
+        run: |2-
+
+                  if [ ! -x "$(command -v jq)" ]; then
+                    echo "jq not found, installing..."
+                    sudo apt-get update
+                    sudo apt-get install -y jq
+                  fi
+                  echo "${{ env.ENCODED_PIPELINE_SECRET }}" | base64 --decode | jq -r 'to_entries[] | "\(.key)=\(.value)"' | while read line; do echo "$line" >> $GITHUB_ENV; echo "::add-mask::${line#*=}"; done
+                
+      - name: 'Run :: Checkout repository for AI Fixes'
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: 'Run :: Get file paths'
+        id: get-file-paths
+        run: |2-
+
+                  files="$(git ls-files -z | tr '\0' ,)"
+                  echo "file-paths=$files" >> $GITHUB_OUTPUT
+                
+      - name: 'Run :: Send logs to AI service'
+        id: send-logs
+        env:
+          FILE_PATHS: ${{ steps.get-file-paths.outputs.file-paths }}
+        run: |2-
+
+                  payload=$(jq -n --arg logs ${{ env.LOGS }} --arg file_paths "$FILE_PATHS" '{"error_message": $logs, "available_files": $file_paths}')
+                  echo "payload: $payload"
+
+                  response=$(curl -X POST -d "$payload"  -H 'Authorization: ${{ env.SERVICE_ACC_ACCESS_TOKEN }}' -H 'x-auth-by: sa' -H 'x-organization-id: ${{ env.PIPELINE_ORGANIZATION_ID }}' -H 'x-project-id: ${{ env.PIPELINE_PROJECT_ID }}' -H 'x-trace-id: ${{ env.PIPELINE_TRACE_ID }}' -H 'x-resource-id: ${{ env.PIPELINE_APPLICATION_ID }}' -H 'Content-Type: application/json'  '${{ env.API_GATEWAY_BASEURL }}/ai-suggested-solution-service/identify-files/')
+
+                  status_code=$?
+                  if [ $status_code -eq 0 ]; then
+                    echo "SUCCESS :: $response"
+                    identifiedFiles=$(echo "$response" | jq -r '.identified_files')
+                  echo "identified-files=$identifiedFiles" >> $GITHUB_OUTPUT
+                  else
+                    echo "FAILED :: $response"
+                    exit 1
+                  fi
+                  
+      - name: 'Run :: Create new branch'
+        run: git checkout -b fix-issue-${{ github.run_id }}
+      - name: 'Run :: Send file to AI Service'
+        id: send-file
+        env:
+          FILE_NAME: ${{ steps.send-logs.outputs.identified-files }}
+          FILE_PATH: ${{ steps.send-logs.outputs.identified-files }}
+        run: |2-
+
+                  file_content=$(cat "$FILE_PATH")
+                  payload=$(jq -n --arg fileName "$FILE_NAME" --arg fileContent "$file_content" --arg logs ${{ env.LOGS }} '{"file_contents": {($fileName): $fileContent}, "error_message": $logs}')
+                  echo "payload: $payload"
+
+                  response=$(curl -X POST -d "$payload"  -H 'Authorization: ${{ env.SERVICE_ACC_ACCESS_TOKEN }}' -H 'x-auth-by: sa' -H 'x-organization-id: ${{ env.PIPELINE_ORGANIZATION_ID }}' -H 'x-project-id: ${{ env.PIPELINE_PROJECT_ID }}' -H 'x-trace-id: ${{ env.PIPELINE_TRACE_ID }}' -H 'x-resource-id: ${{ env.PIPELINE_APPLICATION_ID }}' -H 'Content-Type: application/json'  '${{ env.API_GATEWAY_BASEURL }}/ai-suggested-solution-service/correct-errors/')
+
+                  status_code=$?
+                  if [ $status_code -eq 0 ]; then
+                    echo "SUCCESS :: $response"
+                    correction_files=$(echo "${response}" | jq -r '.corrected_files')
+
+                    # Loop through the JSON object
+                    echo "${correction_files}" | jq -r 'to_entries[] | @base64' | while read -r line; do
+                        # Decode the base64 to get the original JSON string
+                        decoded=$(echo "${line}" | base64 --decode)
+                        # Extract the key (filename) and value (file content) using jq
+                        key=$(echo "${decoded}" | jq -r '.key')
+                        value=$(echo "${decoded}" | jq -r '.value')
+                        # Use the key as the filename and the value as the content, writing to the file
+                        echo "${value}" > "${key}"
+                        echo "Written to ${key}"
+                    done
+                  
+                    echo "All files have been created."
+                    echo "identified-files=$identifiedFiles" >> $GITHUB_OUTPUT
+                  else
+                    echo "FAILED :: $response"
+                    exit 1
+                  fi
+                
+      - name: 'Run :: Commit changes'
+        run: |2-
+
+                  git config --global user.email "actions@github.com"
+                  git config --global user.name "GitHub Actions"
+                  git add .
+                  git commit -m "fix issue"
+                
+      - name: 'Run :: Push changes'
+        run: git push origin fix-issue-${{ github.run_id }}
+      - name: 'Run :: Create Pull Request'
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: fix-issue-${{ github.run_id }}
+          destination_branch: main
+          pr_title: Fix Issue-${{ github.run_id }}
+          pr_body: This pull request fixes the error contained in the logs.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+  _status-success:
+    name: _status Success
+    permissions: write-all
+    runs-on: ubuntu-latest
+    needs:
+      - fix-code-with-ai
+    if: ${{ !(failure() || cancelled()) }}
+    steps:
+      - name: 'Run :: Decoding Secrets 2d19f4'
+        run: |2-
+
+                  if [ ! -x "$(command -v jq)" ]; then
+                    echo "jq not found, installing..."
+                    sudo apt-get update
+                    sudo apt-get install -y jq
+                  fi
+                  echo "${{ env.ENCODED_PIPELINE_SECRET }}" | base64 --decode | jq -r 'to_entries[] | "\(.key)=\(.value)"' | while read line; do echo "$line" >> $GITHUB_ENV; echo "::add-mask::${line#*=}"; done
+                
+      - name: Pipeline Success
+        run: |2-
+
+              response=$(curl -X PUT -H 'Authorization: ${{ env.SERVICE_ACC_ACCESS_TOKEN }}' -H 'x-organization-id: ${{ env.PIPELINE_ORGANIZATION_ID }}' -H 'x-project-id: ${{ env.PIPELINE_PROJECT_ID }}' -H 'x-environment-id: ${{ env.PIPELINE_ENVIRONMENT_ID }}' -H 'x-trace-id: ${{ env.PIPELINE_TRACE_ID }}' -H 'x-auth-by: sa' -H 'Content-Type: application/x-www-form-urlencoded'  '${{ env.API_GATEWAY_BASEURL }}/pipeline-service/${{ env.PIPELINE_ID }}/SUCCESS')
+              
+  _status-failed:
+    name: _status Failed
+    permissions: write-all
+    runs-on: ubuntu-latest
+    needs:
+      - fix-code-with-ai
+    if: ${{ failure() || cancelled() }}
+    steps:
+      - name: 'Run :: Decoding Secrets 92b8b1'
+        run: |2-
+
+                  if [ ! -x "$(command -v jq)" ]; then
+                    echo "jq not found, installing..."
+                    sudo apt-get update
+                    sudo apt-get install -y jq
+                  fi
+                  echo "${{ env.ENCODED_PIPELINE_SECRET }}" | base64 --decode | jq -r 'to_entries[] | "\(.key)=\(.value)"' | while read line; do echo "$line" >> $GITHUB_ENV; echo "::add-mask::${line#*=}"; done
+                
+      - name: Pipeline Failed
+        run: |2-
+
+              response=$(curl -X PUT -H 'Authorization: ${{ env.SERVICE_ACC_ACCESS_TOKEN }}' -H 'x-organization-id: ${{ env.PIPELINE_ORGANIZATION_ID }}' -H 'x-project-id: ${{ env.PIPELINE_PROJECT_ID }}' -H 'x-environment-id: ${{ env.PIPELINE_ENVIRONMENT_ID }}' -H 'x-trace-id: ${{ env.PIPELINE_TRACE_ID }}' -H 'x-auth-by: sa' -H 'Content-Type: application/x-www-form-urlencoded'  '${{ env.API_GATEWAY_BASEURL }}/pipeline-service/${{ env.PIPELINE_ID }}/FAILED')
+              
