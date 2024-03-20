@@ -10,7 +10,7 @@ import { RedisService } from "./services/redis";
 // Connecting to MongoDB
 connectToMongoDB()
   .then(() => {
-    console.log("MongoDB Connected and Initiallized");
+    console.log("MongoDB Connected and Initialized");
 
     // Checking Redis Server Availability
     RedisService.getClient()
