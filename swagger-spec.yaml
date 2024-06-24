@@ -18,9 +18,10 @@ paths:
                   type: string
                 shop_id:
                   type: string
-                  example: "shop01"
+                  example: shop001
                 shop_name:
                   type: string
+                  example: Example Shop
       responses:
         '200':
           description: Successful operation
@@ -70,4 +71,29 @@ paths:
           description: Organization not found
         '500':
           description: Internal server error
+  /shop:
+    post:
+      summary: Add shop
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                shop_id:
+                  type: string
+                  example: shop001
+                shop_name:
+                  type: string
+                  example: Example Shop
+      responses:
+        '200':
+          description: Successful operation
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
 components: {}
+servers:
+  - url: http://api.example.com/v1
