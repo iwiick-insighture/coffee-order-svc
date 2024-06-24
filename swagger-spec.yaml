@@ -23,3 +23,46 @@ paths:
           description: Not found
         '500':
           description: Internal server error
+  /organization/{organization_id}:
+    get:
+      summary: Get organization by ID
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          description: ID of the organization to get
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '404':
+          description: Organization not found
+        '500':
+          description: Internal server error
+    put:
+      summary: Update organization
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          description: ID of the organization to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                organization_name:
+                  type: string
+      responses:
+        '200':
+          description: Successful operation
+        '404':
+          description: Organization not found
+        '500':
+          description: Internal server error
+components: {}
