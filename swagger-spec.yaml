@@ -16,6 +16,11 @@ paths:
               properties:
                 organization_id:
                   type: string
+                shop_id:
+                  type: string
+                  example: "shop01"
+                shop_name:
+                  type: string
       responses:
         '200':
           description: Successful operation
