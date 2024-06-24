@@ -18,7 +18,7 @@ paths:
                   type: string
                 shop_id:
                   type: string
-                  pattern: '^shop[0-9]+$'
+                  pattern: ^shop[0-9]+$
                   example: shop001
                 shop_name:
                   type: string
@@ -42,8 +42,9 @@ paths:
               properties:
                 shop_id:
                   type: string
-                  pattern: '^shop[0-9]+$'
+                  pattern: ^shop[0-9]+$
                   example: shop001
+                  default: shop001
                 shop_name:
                   type: string
                   example: Example Shop
@@ -54,6 +55,6 @@ paths:
           description: Not found
         '500':
           description: Internal server error
-components: {}
+        # Additional response types can be added here if needed
 servers:
   - url: http://api.example.com/v1
