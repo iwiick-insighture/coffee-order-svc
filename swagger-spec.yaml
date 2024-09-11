@@ -1,60 +1,70 @@
-openapi: 3.0.0
+components:
+  schemas:
+    ApiResponse:
+      properties:
+        data:
+          type: object
+        error:
+          type: object
+        message:
+          type: string
+      type: object
 info:
-  title: Organization API
+  title: Merged API Specification
   version: 1.0.0
-  description: API for managing organizations
+openapi: 3.0.0
 paths:
-  /organization:
-    post:
-      summary: Add organization
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                organization_id:
-                  type: string
-                shop_id:
-                  type: string
-                  pattern: ^shop[0-9]+$
-                  example: shop001
-                shop_name:
-                  type: string
-                  example: Example Shop
+  /health:
+    get:
       responses:
         '200':
-          description: Successful operation
-        '404':
-          description: Not found
-        '500':
-          description: Internal server error
-  /shop:
-    post:
-      summary: Add shop
-      requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: OK
+      summary: Health Check Endpoint
+  /orders/{orderId}:
+    delete:
+      parameters:
+      - in: path
+        name: orderId
         required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                shop_id:
-                  type: string
-                  pattern: ^shop[0-9]+$
-                  example: shop001
-                  default: shop001
-                shop_name:
-                  type: string
-                  example: Example Shop
+        schema:
+          type: string
       responses:
         '200':
-          description: Successful operation
-        '404':
-          description: Not found
-        '500':
-          description: Internal server error
-        # Additional response types can be added here if needed
-servers:
-  - url: http://api.example.com/v1
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Bad Request
+      summary: Delete Order by Id
+  /users/{userId}/orders:
+    delete:
+      parameters:
+      - in: path
+        name: userId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Bad Request
+      summary: Delete All User Orders
