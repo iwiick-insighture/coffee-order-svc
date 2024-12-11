@@ -1,0 +1,374 @@
+name: order_pr-ai-dev_app_9a8abf8_env_31ddbbd Pipeline (Skyu Generated)
+'on':
+  workflow_dispatch: {}
+  repository_dispatch:
+    types: pipeline_ca5aa77b-08c5-468d-8e5d-7e261c51636f
+env:
+  ENCODED_PIPELINE_SECRET: ${{secrets.COFFEEORDERSVC_ORDER_PRAIDEV_APP_9A8ABF8_ENV_31DDBBD}}
+  COMMIT_ID: ${{github.event.client_payload.commitId || github.sha || github.run_id}}
+  BRANCH_NAME: >-
+    ${{github.event.client_payload.branchName || github.event.branch ||
+    github.ref_name}}
+jobs:
+  _status-pending:
+    name: ' Status Pending'
+    permissions: write-all
+    env:
+      CONTEXT_JSON: ${{ toJson(github) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Run :: Start'
+        run: |2-
+
+              echo " Starting GitHub Action!" && 
+              echo "STEPS_CAN_PROCEED=true" >> $GITHUB_ENV
+              
+      - name: 'Run :: Checkout repository'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 'Run :: Checkout Specific Commit'
+        env:
+          COMMIT_ID: ${{ github.event.client_payload.commitId }}
+          BRANCH_NAME: ${{ github.event.client_payload.branchName }}
+        if: >-
+          ${{ github.event.client_payload.commitId != null ||
+          github.event.client_payload.branchName != null }}
+        run: |2-
+
+              echo "Starting the checkout process..."
+              git fetch --all
+              if [ -n "$COMMIT_ID" ]; then
+                echo "Commit ID provided: $COMMIT_ID"
+                git checkout $COMMIT_ID || true
+                echo "Checked out to commit ID: $COMMIT_ID"
+              elif [ -n "$BRANCH_NAME" ]; then
+                echo "Branch name provided: $BRANCH_NAME"
+                git checkout $BRANCH_NAME || true
+                echo "Checked out to branch: $BRANCH_NAME"
+
+                #Updating the commit Id
+                ACTUAL_COMMIT_ID=$(git rev-parse HEAD)
+                echo "Changing CommitId: $ACTUAL_COMMIT_ID"
+                echo "COMMIT_ID=$ACTUAL_COMMIT_ID" >> $GITHUB_ENV
+              else
+                echo "Skipping checkout..."
+              fi
+            
+      - name: 'Run :: Decoding Secrets'
+        run: |2-
+
+                if [ ! -x "$(command -v jq)" ]; then
+                  echo "jq not found, installing..."
+                  sudo apt-get update
+                  sudo apt-get install -y jq
+                fi
+                echo "${{ env.ENCODED_PIPELINE_SECRET }}" | base64 --decode | jq -r 'to_entries[] | "\(.key)=\(.value)"' | while read line; do echo "$line" >> $GITHUB_ENV; echo "::add-mask::${line#*=}"; done
+                
+      - name: 'Run :: Pipeline Started'
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |2-
+
+              context=$(echo "$CONTEXT_JSON" | jq --arg sha "$COMMIT_ID" '.sha = $sha' | jq -c . | base64)
+              response=$(curl -X PUT -d "runId=$RUN_ID&context=$context"  -H 'Authorization: ${{ env.SERVICE_ACC_ACCESS_TOKEN }}' -H 'x-organization-id: ${{ env.PIPELINE_ORGANIZATION_ID }}' -H 'x-project-id: ${{ env.PIPELINE_PROJECT_ID }}' -H 'x-environment-id: ${{ env.PIPELINE_ENVIRONMENT_ID }}' -H 'x-trace-id: ${{ env.PIPELINE_TRACE_ID }}' -H 'x-auth-by: sa' -H 'Content-Type: application/x-www-form-urlencoded'  "${{ env.PIPELINE_SERVICE_EP }}/${{ env.PIPELINE_ID }}/PENDING?releaseId=${{ github.event.client_payload.releaseData.releaseId }}")
+              if echo "$response" | grep -q '"success":true'; then
+                echo "SUCCESS :: $response"
+              else
+                echo "FAILED :: $response"
+              fi
+              
+  fix-code-with-ai:
+    name: Fix Code With AI
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: 'Run :: Check Logs'
+        id: check-logs
+        env:
+          LOGS: ${{ github.event.client_payload.logs }}
+        run: |2-
+
+                    if ${{ env.LOGS != null }}; then
+                      echo "Logs found..."
+                      echo "Logs: ${{ env.LOGS }}"
+                    else 
+                      echo "Logs Not found to run the AI pipeline"
+                      exit 1
+                    fi
+                  
+      - name: 'Run :: Decoding Secrets'
+        run: |2-
+
+                if [ ! -x "$(command -v jq)" ]; then
+                  echo "jq not found, installing..."
+                  sudo apt-get update
+                  sudo apt-get install -y jq
+                fi
+                echo "${{ env.ENCODED_PIPELINE_SECRET }}" | base64 --decode | jq -r 'to_entries[] | "\(.key)=\(.value)"' | while read line; do echo "$line" >> $GITHUB_ENV; echo "::add-mask::${line#*=}"; done
+                
+      - name: 'Run :: Checkout repository for AI Fixes'
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: 'Run :: Get file paths'
+        id: get-file-paths
+        run: |2-
+
+                    files="$(git ls-files -z | tr '\0' ,)"
+                    echo "file-paths=$files" >> $GITHUB_OUTPUT
+                  
+      - name: 'Run :: Send logs to AI service'
+        id: send-logs
+        env:
+          LOGS: ${{ github.event.client_payload.logs }}
+          FILE_PATHS: ${{ steps.get-file-paths.outputs.file-paths }}
+        run: |2-
+
+                    payload=$(jq -n --arg logs "${{ env.LOGS }} | @sh" --arg file_paths "$FILE_PATHS" '{"error_message": $logs, "available_files": $file_paths}')
+                    echo "payload: $payload"
+            
+                    response=$(curl -X POST -d "$payload"  -H 'Authorization: ${{ env.SERVICE_ACC_ACCESS_TOKEN }}' -H 'x-auth-by: sa' -H 'x-organization-id: ${{ env.PIPELINE_ORGANIZATION_ID }}' -H 'x-project-id: ${{ env.PIPELINE_PROJECT_ID }}' -H 'x-trace-id: ${{ env.PIPELINE_TRACE_ID }}' -H 'x-resource-id: ${{ env.PIPELINE_APPLICATION_ID }}' -H 'Content-Type: application/json'  "${{ env.AI_SUGGESTED_SOLUTION_EP }}/identify-files/")
+            
+                    status_code=$?
+                    if [ $status_code -eq 0 ]; then
+                      echo "SUCCESS :: $response"
+                      identifiedFiles=$(echo "$response" | jq -r '.identified_files')
+                    echo "identified-files=$identifiedFiles" >> $GITHUB_OUTPUT
+                    else
+                      echo "FAILED :: $response"
+                      exit 1
+                    fi
+                    
+      - name: 'Run :: Create new branch'
+        run: git checkout -b fix-issue-${{ github.run_id }}
+      - name: 'Run :: Send file to AI Service'
+        id: send-file
+        env:
+          LOGS: ${{ github.event.client_payload.logs }}
+          FILE_NAME: ${{ steps.send-logs.outputs.identified-files }}
+          FILE_PATH: ${{ steps.send-logs.outputs.identified-files }}
+        run: |2-
+
+                    file_content=$(cat "$FILE_PATH")
+                    payload=$(jq -n --arg fileName "$FILE_NAME" --arg fileContent "$file_content" --arg logs "${{ env.LOGS }} | @sh" '{"code_dict": {($fileName): $fileContent}, "error_log": $logs}')
+                    echo "payload: $payload"
+            
+                    echo "Starting Task"
+                    response=$(curl -X POST -d "$payload"  -H 'Authorization: ${{ env.SERVICE_ACC_ACCESS_TOKEN }}' -H 'x-auth-by: sa' -H 'x-organization-id: ${{ env.PIPELINE_ORGANIZATION_ID }}' -H 'x-project-id: ${{ env.PIPELINE_PROJECT_ID }}' -H 'x-trace-id: ${{ env.PIPELINE_TRACE_ID }}' -H 'x-resource-id: ${{ env.PIPELINE_APPLICATION_ID }}' -H 'Content-Type: application/json'  "${{ env.AI_SUGGESTED_SOLUTION_EP }}/fix-errors")
+            
+                    echo "Task Response: $response"
+                    task_id=$(echo "$response" | jq -r '.task_id')
+            
+                    if [ -n "$task_id" ]; then
+                      echo "Task ID: $task_id"
+            
+                      while true; do
+                        final_response=$(curl -X GET -H 'Authorization: ${{ env.SERVICE_ACC_ACCESS_TOKEN }}' -H 'x-auth-by: sa' -H 'x-organization-id: ${{ env.PIPELINE_ORGANIZATION_ID }}' -H 'x-project-id: ${{ env.PIPELINE_PROJECT_ID }}' -H 'x-trace-id: ${{ env.PIPELINE_TRACE_ID }}' -H 'x-resource-id: ${{ env.PIPELINE_APPLICATION_ID }}' -H 'Content-Type: application/json'  "${{ env.AI_SUGGESTED_SOLUTION_EP }}/fix-errors/$task_id")
+                        echo "Task Status Response: $final_response"
+                        task_status=$(echo "$final_response" | jq -r '.status')
+            
+                        if [ "$task_status" != "completed" ]; then
+                        echo "Task processing ..."
+                        sleep 10  
+                        else
+                          echo "Task done... Proceeding"
+                          break
+                        fi
+                      done
+            
+                      status_code=$?
+                      if [ $status_code -eq 0 ]; then
+                        echo "SUCCESS :: $final_response"
+                        correction_files=$(echo "${final_response}" | jq -r '.result' | jq -r '.fixes')
+                        ai_commit_message=$(echo "${final_response}" | jq -r '.result' | jq -r '.commit_message')
+            
+                        # Loop through the JSON object
+                        echo "${correction_files}" | jq -r 'to_entries[] | @base64' | while read -r line; do
+                            # Decode the base64 to get the original JSON string
+                            decoded=$(echo "${line}" | base64 --decode)
+                            # Extract the key (filename) and value (file content) using jq
+                            key=$(echo "${decoded}" | jq -r '.key')
+                            value=$(echo "${decoded}" | jq -r '.value')
+                            # Use the key as the filename and the value as the content, writing to the file
+                            echo "${value}" > "${key}"
+                            echo "Written to ${key}"
+                        done
+                        
+                        echo "All files have been created."
+                        echo "ai_commit_message=$ai_commit_message" >> $GITHUB_OUTPUT
+                      else
+                        echo "FAILED :: $final_response"
+                        exit 1
+                      fi
+                    else
+                      echo "Failed to Start Task"
+                      exit 1
+                    fi
+                  
+      - name: 'Run :: Commit changes'
+        run: |2-
+
+                    echo "Commit Message: ${{ steps.send-file.outputs.ai_commit_message }}"
+                    git config --global user.email "actions@github.com"
+                    git config --global user.name "GitHub Actions"
+                    git add .
+                    if git commit -m "${{ steps.send-file.outputs.ai_commit_message }}"; then
+                      echo "commit_status=success" >> $GITHUB_ENV
+                    else
+                      echo "commit_status=skip" >> $GITHUB_ENV
+                    fi
+                  
+      - name: 'Run :: Push changes'
+        if: env.commit_status == 'success'
+        run: git push origin fix-issue-${{ github.run_id }}
+      - name: 'Run :: Create Pull Request'
+        if: env.commit_status == 'success'
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: fix-issue-${{ github.run_id }}
+          destination_branch: main
+          pr_title: Fix Issue-${{ github.run_id }}
+          pr_body: ${{ steps.send-file.outputs.ai_commit_message }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+  _status-success:
+    name: ' Status Success'
+    permissions: write-all
+    env:
+      CONTEXT_JSON: ${{ toJson(github) }}
+    runs-on: ubuntu-latest
+    needs:
+      - fix-code-with-ai
+    if: ${{ !(failure() || cancelled()) }}
+    steps:
+      - name: 'Run :: Start'
+        run: |2-
+
+              echo " Starting GitHub Action!" && 
+              echo "STEPS_CAN_PROCEED=true" >> $GITHUB_ENV
+              
+      - name: 'Run :: Checkout repository'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 'Run :: Checkout Specific Commit'
+        env:
+          COMMIT_ID: ${{ github.event.client_payload.commitId }}
+          BRANCH_NAME: ${{ github.event.client_payload.branchName }}
+        if: >-
+          ${{ github.event.client_payload.commitId != null ||
+          github.event.client_payload.branchName != null }}
+        run: |2-
+
+              echo "Starting the checkout process..."
+              git fetch --all
+              if [ -n "$COMMIT_ID" ]; then
+                echo "Commit ID provided: $COMMIT_ID"
+                git checkout $COMMIT_ID || true
+                echo "Checked out to commit ID: $COMMIT_ID"
+              elif [ -n "$BRANCH_NAME" ]; then
+                echo "Branch name provided: $BRANCH_NAME"
+                git checkout $BRANCH_NAME || true
+                echo "Checked out to branch: $BRANCH_NAME"
+
+                #Updating the commit Id
+                ACTUAL_COMMIT_ID=$(git rev-parse HEAD)
+                echo "Changing CommitId: $ACTUAL_COMMIT_ID"
+                echo "COMMIT_ID=$ACTUAL_COMMIT_ID" >> $GITHUB_ENV
+              else
+                echo "Skipping checkout..."
+              fi
+            
+      - name: 'Run :: Decoding Secrets'
+        run: |2-
+
+                if [ ! -x "$(command -v jq)" ]; then
+                  echo "jq not found, installing..."
+                  sudo apt-get update
+                  sudo apt-get install -y jq
+                fi
+                echo "${{ env.ENCODED_PIPELINE_SECRET }}" | base64 --decode | jq -r 'to_entries[] | "\(.key)=\(.value)"' | while read line; do echo "$line" >> $GITHUB_ENV; echo "::add-mask::${line#*=}"; done
+                
+      - name: 'Run :: Pipeline Success'
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |2-
+
+              context=$(echo "$CONTEXT_JSON" | jq --arg sha "$COMMIT_ID" '.sha = $sha' | jq -c . | base64)
+              response=$(curl -X PUT -d "runId=$RUN_ID&context=$context"  -H 'Authorization: ${{ env.SERVICE_ACC_ACCESS_TOKEN }}' -H 'x-organization-id: ${{ env.PIPELINE_ORGANIZATION_ID }}' -H 'x-project-id: ${{ env.PIPELINE_PROJECT_ID }}' -H 'x-environment-id: ${{ env.PIPELINE_ENVIRONMENT_ID }}' -H 'x-trace-id: ${{ env.PIPELINE_TRACE_ID }}' -H 'x-auth-by: sa' -H 'Content-Type: application/x-www-form-urlencoded'  "${{ env.PIPELINE_SERVICE_EP }}/${{ env.PIPELINE_ID }}/SUCCESS?releaseId=${{ github.event.client_payload.releaseData.releaseId }}")
+              
+  _status-failed:
+    name: ' Status Failed'
+    permissions: write-all
+    env:
+      CONTEXT_JSON: ${{ toJson(github) }}
+    runs-on: ubuntu-latest
+    needs:
+      - fix-code-with-ai
+    if: ${{ failure() || cancelled() }}
+    steps:
+      - name: 'Run :: Start'
+        run: |2-
+
+              echo " Starting GitHub Action!" && 
+              echo "STEPS_CAN_PROCEED=true" >> $GITHUB_ENV
+              
+      - name: 'Run :: Checkout repository'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 'Run :: Checkout Specific Commit'
+        env:
+          COMMIT_ID: ${{ github.event.client_payload.commitId }}
+          BRANCH_NAME: ${{ github.event.client_payload.branchName }}
+        if: >-
+          ${{ github.event.client_payload.commitId != null ||
+          github.event.client_payload.branchName != null }}
+        run: |2-
+
+              echo "Starting the checkout process..."
+              git fetch --all
+              if [ -n "$COMMIT_ID" ]; then
+                echo "Commit ID provided: $COMMIT_ID"
+                git checkout $COMMIT_ID || true
+                echo "Checked out to commit ID: $COMMIT_ID"
+              elif [ -n "$BRANCH_NAME" ]; then
+                echo "Branch name provided: $BRANCH_NAME"
+                git checkout $BRANCH_NAME || true
+                echo "Checked out to branch: $BRANCH_NAME"
+
+                #Updating the commit Id
+                ACTUAL_COMMIT_ID=$(git rev-parse HEAD)
+                echo "Changing CommitId: $ACTUAL_COMMIT_ID"
+                echo "COMMIT_ID=$ACTUAL_COMMIT_ID" >> $GITHUB_ENV
+              else
+                echo "Skipping checkout..."
+              fi
+            
+      - name: 'Run :: Decoding Secrets'
+        run: |2-
+
+                if [ ! -x "$(command -v jq)" ]; then
+                  echo "jq not found, installing..."
+                  sudo apt-get update
+                  sudo apt-get install -y jq
+                fi
+                echo "${{ env.ENCODED_PIPELINE_SECRET }}" | base64 --decode | jq -r 'to_entries[] | "\(.key)=\(.value)"' | while read line; do echo "$line" >> $GITHUB_ENV; echo "::add-mask::${line#*=}"; done
+                
+      - name: 'Run :: Pipeline Failed'
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |2-
+
+              context=$(echo "$CONTEXT_JSON" | jq --arg sha "$COMMIT_ID" '.sha = $sha' | jq -c . | base64)
+              response=$(curl -X PUT -d "runId=$RUN_ID&context=$context"  -H 'Authorization: ${{ env.SERVICE_ACC_ACCESS_TOKEN }}' -H 'x-organization-id: ${{ env.PIPELINE_ORGANIZATION_ID }}' -H 'x-project-id: ${{ env.PIPELINE_PROJECT_ID }}' -H 'x-environment-id: ${{ env.PIPELINE_ENVIRONMENT_ID }}' -H 'x-trace-id: ${{ env.PIPELINE_TRACE_ID }}' -H 'x-auth-by: sa' -H 'Content-Type: application/x-www-form-urlencoded'  "${{ env.PIPELINE_SERVICE_EP }}/${{ env.PIPELINE_ID }}/FAILED?releaseId=${{ github.event.client_payload.releaseData.releaseId }}")
+
+              # Triggering SkyU Alerts
+              response=$(curl -X POST -d "labels[alertname]=pipelineFailed&labels[pipelineId]=${{ env.PIPELINE_ID }}&message=Pipeline Failed&messageTitle=Pipeline ${{ env.PIPELINE_ID }} Failed&status=firing"  -H 'Content-Type: application/x-www-form-urlencoded'  "${{ env.FIRE_SKYU_ALERT_EP }}?organizationId=${{ env.PIPELINE_ORGANIZATION_ID }}&projectId=${{ env.PIPELINE_PROJECT_ID }}&environmentId=${{ env.PIPELINE_ENVIRONMENT_ID }}&token=${{ env.SERVICE_ACC_ACCESS_TOKEN_STRIPPED }}&authBy=sa")
+
+              if echo "$response" | grep -q '"success":true'; then
+                echo "SUCCESS :: $response"
+              else
+                echo "FAILED :: $response"
+              fi
+              
