@@ -500,6 +500,8 @@ jobs:
     needs:
       - code-scan
       - _status_testing
+      - code-scan
+      - _status_testing
       - build-and-push
       - deploy
     if: ${{ !(failure() || cancelled()) }}
@@ -567,6 +569,8 @@ jobs:
       CONTEXT_JSON: ${{ toJson(github) }}
     runs-on: ubuntu-latest
     needs:
+      - code-scan
+      - _status_testing
       - code-scan
       - _status_testing
       - build-and-push
@@ -644,6 +648,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-and-push
+      - _status_testing
     if: >-
       needs.build-and-push.outputs.stepsCanProceed == 'true' &&
       github.event.client_payload.releaseData == null
